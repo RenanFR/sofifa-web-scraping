@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVFormat.Builder;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
@@ -44,7 +45,7 @@ public class PlayerDetails {
 
 	public static void main(String[] args) throws Exception {
 		WebClient webClient = SoFifaWebScraping.getWebClient();
-		
+
 		String playersRemainderDumpFile = REMAINDER_PLAYERS_TO_READ_CSV_PATH + "-"
 				+ LocalDateTime.now().format(DateTimeFormatter.ofPattern("ddMMyyyyHHmmss")) + ".csv";
 
@@ -53,17 +54,20 @@ public class PlayerDetails {
 		BufferedWriter writer = Files.newBufferedWriter(Paths.get(PLAYERS_DATA_CSV_PATH), StandardOpenOption.APPEND,
 				StandardOpenOption.CREATE);
 
-		try (final CSVPrinter csvPrinter = new CSVPrinter(writer, CSVFormat.DEFAULT.builder()
-				.setHeader("NAME", "HEIGHT", "KIT_NUMBER", "CROSSING", "FINISHING", "HEADING_ACCURACY", "SHORT_PASSING",
-						"VOLLEYS", "DRIBBLING", "CURVE", "FK_ACCURACY", "LONG_PASSING", "BALL_CONTROL", "ACCELERATION",
-						"SPRINT_SPEED", "AGILITY", "REACTIONS", "BALANCE", "AGGRESSION", "INTERCEPTIONS", "POSITIONING",
-						"VISION", "PENALTIES", "COMPOSURE", "DEFENSIVE_AWARENESS", "STANDING_TACKLE", "SLIDING_TACKLE",
-						"GK_DIVING", "GK_HANDLING", "GK_KICKING", "GK_POSITIONING", "GK_REFLEXES", "POSITION")
-				.build())) {
+		Builder csvFormatBuilder = CSVFormat.DEFAULT.builder();
+		if (!Files.exists(Paths.get(PLAYERS_DATA_CSV_PATH))) {
+			csvFormatBuilder.setHeader("NAME", "HEIGHT", "KIT_NUMBER", "CROSSING", "FINISHING", "HEADING_ACCURACY",
+					"SHORT_PASSING", "VOLLEYS", "DRIBBLING", "CURVE", "FK_ACCURACY", "LONG_PASSING", "BALL_CONTROL",
+					"ACCELERATION", "SPRINT_SPEED", "AGILITY", "REACTIONS", "BALANCE", "AGGRESSION", "INTERCEPTIONS",
+					"POSITIONING", "VISION", "PENALTIES", "COMPOSURE", "DEFENSIVE_AWARENESS", "STANDING_TACKLE",
+					"SLIDING_TACKLE", "GK_DIVING", "GK_HANDLING", "GK_KICKING", "GK_POSITIONING", "GK_REFLEXES",
+					"POSITION");
+		}
+		try (final CSVPrinter csvPrinter = new CSVPrinter(writer, csvFormatBuilder.build())) {
 
 			for (String playerURL : playersURLList) {
 
-				Thread.sleep(10000);
+				Thread.sleep(1000);
 
 				System.out.println(playerURL);
 
@@ -190,14 +194,31 @@ public class PlayerDetails {
 				String penaltiesValue = penaltiesSpan.getEnclosingElement("li").getTextContent().replaceAll("[^0-9]",
 						"");
 
-				HtmlSpan composureSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Composure')]").get(0);
-				String composureValue = composureSpan.getEnclosingElement("li").getTextContent().replaceAll("[^0-9]",
-						"");
+				String composureValue;
+				List<Object> composureSpanPath = playerPage.getByXPath("//span[contains(.,'Composure')]");
+				if (composureSpanPath != null && !composureSpanPath.isEmpty()) {
+					
+					HtmlSpan composureSpan = (HtmlSpan) composureSpanPath.get(0);
+					composureValue = composureSpan.getEnclosingElement("li").getTextContent().replaceAll("[^0-9]",
+							"");
+				} else {
+					composureValue = "0";
+				}
 
-				HtmlSpan defensiveAwarenessSpan = (HtmlSpan) playerPage
-						.getByXPath("//span[contains(.,'Defensive Awareness')]").get(0);
-				String defensiveAwarenessValue = defensiveAwarenessSpan.getEnclosingElement("li").getTextContent()
-						.replaceAll("[^0-9]", "");
+				String defensiveAwarenessValue;
+				List<Object> defensiveAwarenessPath = playerPage
+						.getByXPath("//span[contains(.,'Defensive Awareness')]");
+				if (defensiveAwarenessPath != null && !defensiveAwarenessPath.isEmpty()) {
+					
+					HtmlSpan defensiveAwarenessSpan = (HtmlSpan) defensiveAwarenessPath.get(0);
+					defensiveAwarenessValue = defensiveAwarenessSpan.getEnclosingElement("li").getTextContent()
+							.replaceAll("[^0-9]", "");
+				} else {
+					HtmlSpan markingSpan = (HtmlSpan) playerPage
+							.getByXPath("//span[contains(.,'Marking')]").get(0);
+					defensiveAwarenessValue = markingSpan.getEnclosingElement("li").getTextContent()
+							.replaceAll("[^0-9]", "");;
+				}
 
 				HtmlSpan standingTackleSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Standing Tackle')]")
 						.get(0);
@@ -273,9 +294,7 @@ public class PlayerDetails {
 
 				playersURLList.remove(playerURL);
 
-				SoFifaWebScraping.writePlayersToReadCsv(
-						playersRemainderDumpFile,
-						playersURLList);
+				SoFifaWebScraping.writePlayersToReadCsv(playersRemainderDumpFile, playersURLList);
 			}
 		}
 
@@ -290,11 +309,14 @@ public class PlayerDetails {
 						&& file.getFileName().toString().matches(".*\\d+.*"))
 				.max((oneFile, otherFile) -> {
 					return LocalDateTime
-							.parse(oneFile.getFileName().toString().split("-")[1],
+							.parse(oneFile.getFileName().toString().split("-")[1].split("\\.")[0],
 									DateTimeFormatter.ofPattern("ddMMyyyyHHmmss"))
-							.compareTo(LocalDateTime.parse(otherFile.getFileName().toString().split("-")[1],
+							.compareTo(LocalDateTime.parse(otherFile.getFileName().toString().split("-")[1].split("\\.")[0],
 									DateTimeFormatter.ofPattern("ddMMyyyyHHmmss")));
 				});
+		if (latestRemainderDump.isPresent()) {
+			System.out.println("USING DUMP FILE: " + latestRemainderDump.get().getFileName());
+		}
 		try (Reader reader = Files
 				.newBufferedReader(latestRemainderDump.orElse(Paths.get(SoFifaWebScraping.PLAYERS_URL_LIST_CSV_PATH)));
 				CSVParser csvParser = new CSVParser(reader,
