@@ -90,7 +90,7 @@ public class SoFifaWebScraping {
 		} else {
 			HtmlSpan spanNext = (HtmlSpan) spanNextPath.get(0);
 			String nextOffsetURL = spanNext.getEnclosingElement("a").getAttribute("href");
-			String nextPageURL = SOFIFA_URL.replace("/players", nextOffsetURL);
+			String nextPageURL = SOFIFA_URL.replace("/" + SOFIFA_URL.split("/")[3], nextOffsetURL);
 			hasNextPage.set(true);
 			fetchTablePageForPlayersLinks(webClient, webClient.getPage(nextPageURL), hasNextPage);
 
