@@ -7,11 +7,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -22,6 +25,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 
 import com.gargoylesoftware.htmlunit.WebClient;
+import com.gargoylesoftware.htmlunit.html.HtmlAnchor;
 import com.gargoylesoftware.htmlunit.html.HtmlDivision;
 import com.gargoylesoftware.htmlunit.html.HtmlLabel;
 import com.gargoylesoftware.htmlunit.html.HtmlPage;
@@ -56,13 +60,14 @@ public class PlayerDetails {
 
 		Builder csvFormatBuilder = CSVFormat.DEFAULT.builder();
 		if (!Files.exists(Paths.get(PLAYERS_DATA_CSV_PATH))) {
-			csvFormatBuilder.setHeader("NAME", "ID", "OVERALL_RATING", "POTENTIAL", "VALUE", "WAGE", "HEIGHT",
-					"KIT_NUMBER", "PREFERRED_FOOT", "WEAK_FOOT", "SKILL_MOVES", "INTERNATIONAL_REPUTATION", "REAL_FACE",
-					"RELEASE_CLAUSE", "CROSSING", "FINISHING", "HEADING_ACCURACY", "SHORT_PASSING", "VOLLEYS",
-					"DRIBBLING", "CURVE", "FK_ACCURACY", "LONG_PASSING", "BALL_CONTROL", "ACCELERATION", "SPRINT_SPEED",
-					"AGILITY", "REACTIONS", "BALANCE", "AGGRESSION", "INTERCEPTIONS", "POSITIONING", "VISION",
-					"PENALTIES", "COMPOSURE", "DEFENSIVE_AWARENESS", "STANDING_TACKLE", "SLIDING_TACKLE", "GK_DIVING",
-					"GK_HANDLING", "GK_KICKING", "GK_POSITIONING", "GK_REFLEXES", "POSITION");
+			csvFormatBuilder.setHeader("NAME", "BIRTH_DATE", "COUNTRY", "TEAM", "ID", "OVERALL_RATING", "POTENTIAL",
+					"VALUE", "WAGE", "HEIGHT", "KIT_NUMBER", "PREFERRED_FOOT", "WEAK_FOOT", "SKILL_MOVES",
+					"INTERNATIONAL_REPUTATION", "REAL_FACE", "RELEASE_CLAUSE", "CROSSING", "FINISHING",
+					"HEADING_ACCURACY", "SHORT_PASSING", "VOLLEYS", "DRIBBLING", "CURVE", "FK_ACCURACY", "LONG_PASSING",
+					"BALL_CONTROL", "ACCELERATION", "SPRINT_SPEED", "AGILITY", "REACTIONS", "BALANCE", "AGGRESSION",
+					"INTERCEPTIONS", "POSITIONING", "VISION", "PENALTIES", "COMPOSURE", "DEFENSIVE_AWARENESS",
+					"STANDING_TACKLE", "SLIDING_TACKLE", "GK_DIVING", "GK_HANDLING", "GK_KICKING", "GK_POSITIONING",
+					"GK_REFLEXES", "POSITION");
 		}
 
 		BufferedWriter writer = Files.newBufferedWriter(Paths.get(PLAYERS_DATA_CSV_PATH), StandardOpenOption.APPEND,
@@ -83,18 +88,44 @@ public class PlayerDetails {
 
 				if (!fifaLatestVersionForPlayerPath.isEmpty()) {
 					System.out.println("FIFA 23 player");
-					HtmlDivision infoDiv = (HtmlDivision) playerPage
-							.getByXPath("//div[contains(@class, 'info')]").get(0);
-					
+					HtmlDivision infoDiv = (HtmlDivision) playerPage.getByXPath("//div[contains(@class, 'info')]")
+							.get(0);
+
 					String name = infoDiv.getElementsByTagName("h1").get(0).getTextContent();
 
 					HtmlDivision infoHeaderDiv = (HtmlDivision) infoDiv.getElementsByTagName("div").get(0);
+
+					String country = infoHeaderDiv.getElementsByTagName("a").get(0).getAttribute("title");
+
+					String team = "Unknown";
+					List<Object> teamAnchorPath = playerPage
+							.getByXPath("//*[@id=\"body\"]/div[2]/div/div[2]/div[4]/div/h5/a");
+					if (teamAnchorPath != null && !teamAnchorPath.isEmpty()) {
+
+						HtmlAnchor teamAnchor = (HtmlAnchor) teamAnchorPath.get(0);
+						team = teamAnchor.getTextContent().trim();
+					}
 
 					String[] generalInformationDivParts = infoHeaderDiv.asNormalizedText().split("/");
 					String[] positionBirthAndHeightInformation = generalInformationDivParts[0].split(" ");
 					String mainPosition = positionBirthAndHeightInformation[0];
 					String height = positionBirthAndHeightInformation[positionBirthAndHeightInformation.length - 1]
 							.substring(0, 3);
+
+					String day = positionBirthAndHeightInformation[positionBirthAndHeightInformation.length - 3];
+					String dayPattern = day.replace(",", "").length() == 1 ? "d" : "dd";
+					String monthPattern = "MMM";
+					String yearPattern = "yyyy";
+					String pattern = monthPattern + "-" + dayPattern + "-" + yearPattern;
+
+					DateTimeFormatter birthDateFormatter = new DateTimeFormatterBuilder().appendPattern(pattern)
+							.parseCaseInsensitive().toFormatter(Locale.US);
+					String birthDateText = (positionBirthAndHeightInformation[positionBirthAndHeightInformation.length
+							- 4] + "-" + day + "-"
+							+ positionBirthAndHeightInformation[positionBirthAndHeightInformation.length - 2])
+							.replace("(", "").replace(")", "").replace(",", "").replace(" ", "");
+					LocalDate birthDate = LocalDate.parse(birthDateText, birthDateFormatter);
+					String birthDateStr = birthDate.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
 
 					String id = playerURL.split("/")[2];
 
@@ -360,8 +391,8 @@ public class PlayerDetails {
 					String gkReflexesValue = gkReflexesSpan.getEnclosingElement("li").getElementsByTagName("span")
 							.get(0).getTextContent().replaceAll("[^0-9]", "");
 
-					Player player = new Player(name, id, overallRating, potential, value, wage,
-							Integer.parseInt(height), kitNumber, preferredFoot, weakFoot, skillMoves,
+					Player player = new Player(name, birthDate, country, team, id, overallRating, potential, value,
+							wage, Integer.parseInt(height), kitNumber, preferredFoot, weakFoot, skillMoves,
 							internationalReputation, realFace, releaseClause,
 							new Attacking(Integer.parseInt(crossingValue), Integer.parseInt(finishingValue),
 									Integer.parseInt(headingAccuracyValue), Integer.parseInt(shortPassingValue),
@@ -386,10 +417,11 @@ public class PlayerDetails {
 							mainPosition);
 					players.add(player);
 
-					csvPrinter.printRecord(player.name(), player.id(), player.overallRating(), player.potential(),
-							player.value(), player.wage(), player.height(), player.kitNumber(), player.preferredFoot(),
-							player.weakFoot(), player.skillMoves(), player.internationalReputation(), player.realFace(),
-							player.releaseClause(), player.attacking().crossing(), player.attacking().finishing(),
+					csvPrinter.printRecord(player.name(), birthDateStr, player.country(), player.team(), player.id(),
+							player.overallRating(), player.potential(), player.value(), player.wage(), player.height(),
+							player.kitNumber(), player.preferredFoot(), player.weakFoot(), player.skillMoves(),
+							player.internationalReputation(), player.realFace(), player.releaseClause(),
+							player.attacking().crossing(), player.attacking().finishing(),
 							player.attacking().headingAccuracy(), player.attacking().shortPassing(),
 							player.attacking().volleys(), player.skill().dribbling(), player.skill().curve(),
 							player.skill().fkAccuracy(), player.skill().longPassing(), player.skill().ballControl(),
