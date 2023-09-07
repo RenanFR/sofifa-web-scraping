@@ -64,10 +64,10 @@ public class PlayerDetails {
 					"VALUE", "WAGE", "HEIGHT", "KIT_NUMBER", "PREFERRED_FOOT", "WEAK_FOOT", "SKILL_MOVES",
 					"INTERNATIONAL_REPUTATION", "REAL_FACE", "RELEASE_CLAUSE", "CROSSING", "FINISHING",
 					"HEADING_ACCURACY", "SHORT_PASSING", "VOLLEYS", "DRIBBLING", "CURVE", "FK_ACCURACY", "LONG_PASSING",
-					"BALL_CONTROL", "ACCELERATION", "SPRINT_SPEED", "AGILITY", "REACTIONS", "BALANCE", "AGGRESSION",
-					"INTERCEPTIONS", "POSITIONING", "VISION", "PENALTIES", "COMPOSURE", "DEFENSIVE_AWARENESS",
-					"STANDING_TACKLE", "SLIDING_TACKLE", "GK_DIVING", "GK_HANDLING", "GK_KICKING", "GK_POSITIONING",
-					"GK_REFLEXES", "POSITION");
+					"BALL_CONTROL", "ACCELERATION", "SPRINT_SPEED", "AGILITY", "REACTIONS", "BALANCE", "SHOT_POWER",
+					"JUMPING", "STAMINA", "STRENGTH", "LONG_SHOTS", "AGGRESSION", "INTERCEPTIONS", "POSITIONING",
+					"VISION", "PENALTIES", "COMPOSURE", "DEFENSIVE_AWARENESS", "STANDING_TACKLE", "SLIDING_TACKLE",
+					"GK_DIVING", "GK_HANDLING", "GK_KICKING", "GK_POSITIONING", "GK_REFLEXES", "POSITION");
 		}
 
 		BufferedWriter writer = Files.newBufferedWriter(Paths.get(PLAYERS_DATA_CSV_PATH), StandardOpenOption.APPEND,
@@ -130,15 +130,15 @@ public class PlayerDetails {
 					String id = playerURL.split("/")[2];
 
 					String preferredFoot = "Unknown";
-					List<Object> preferredFootPath = playerPage.getByXPath("//label[contains(.,'Preferred Foot')]");
+					List<Object> preferredFootPath = playerPage.getByXPath("//label[contains(.,'Preferred foot')]");
 					if (preferredFootPath != null && !preferredFootPath.isEmpty()) {
 						HtmlLabel preferredFootLabel = (HtmlLabel) preferredFootPath.get(0);
 						preferredFoot = preferredFootLabel.getEnclosingElement("li").getTextContent()
-								.replace("Preferred Foot", "");
+								.replace("Preferred foot", "");
 					}
 
 					Integer weakFoot = 0;
-					List<Object> weakFootPath = playerPage.getByXPath("//label[contains(.,'Weak Foot')]");
+					List<Object> weakFootPath = playerPage.getByXPath("//label[contains(.,'Weak foot')]");
 					if (weakFootPath != null && !weakFootPath.isEmpty()) {
 						HtmlLabel weakFootLabel = (HtmlLabel) weakFootPath.get(0);
 						weakFoot = Integer.parseInt(weakFootLabel.getEnclosingElement("li").getTextContent()
@@ -147,7 +147,7 @@ public class PlayerDetails {
 
 					Integer overallRating = 0;
 					List<Object> overallRatingPath = playerPage
-							.getByXPath("//div[contains(@class, 'sub') and contains(.,'Overall Rating')]");
+							.getByXPath("//div[contains(@class, 'sub') and contains(.,'Overall rating')]");
 					if (overallRatingPath != null && !overallRatingPath.isEmpty()) {
 						HtmlDivision overallRatingDiv = (HtmlDivision) overallRatingPath.get(0);
 						overallRating = Integer.parseInt(overallRatingDiv.getEnclosingElement("div")
@@ -180,7 +180,7 @@ public class PlayerDetails {
 					}
 
 					Integer skillMoves = 0;
-					List<Object> skillMovesPath = playerPage.getByXPath("//label[contains(.,'Skill Moves')]");
+					List<Object> skillMovesPath = playerPage.getByXPath("//label[contains(.,'Skill moves')]");
 					if (skillMovesPath != null && !skillMovesPath.isEmpty()) {
 						HtmlLabel skillMovesLabel = (HtmlLabel) skillMovesPath.get(0);
 						skillMoves = Integer.parseInt(skillMovesLabel.getEnclosingElement("li").getTextContent()
@@ -189,16 +189,16 @@ public class PlayerDetails {
 
 					Integer internationalReputation = 0;
 					List<Object> internationalReputationPath = playerPage
-							.getByXPath("//label[contains(.,'International Reputation')]");
+							.getByXPath("//label[contains(.,'International reputation')]");
 					if (internationalReputationPath != null && !internationalReputationPath.isEmpty()) {
 						HtmlLabel internationalReputationLabel = (HtmlLabel) internationalReputationPath.get(0);
 						internationalReputation = Integer
 								.parseInt(internationalReputationLabel.getEnclosingElement("li").getTextContent()
-										.replace("International Reputation", "").replaceAll("[^0-9]", ""));
+										.replace("International reputation", "").replaceAll("[^0-9]", ""));
 					}
 
 					Boolean realFace = Boolean.FALSE;
-					List<Object> realFacePath = playerPage.getByXPath("//label[contains(.,'Real Face')]");
+					List<Object> realFacePath = playerPage.getByXPath("//label[contains(.,'Real face')]");
 					if (realFacePath != null && !realFacePath.isEmpty()) {
 						HtmlLabel realFaceLabel = (HtmlLabel) realFacePath.get(0);
 						realFace = realFaceLabel.getEnclosingElement("li").getElementsByTagName("span").get(0)
@@ -206,14 +206,14 @@ public class PlayerDetails {
 					}
 
 					String releaseClause = "0";
-					List<Object> releaseClausePath = playerPage.getByXPath("//label[contains(.,'Release Clause')]");
+					List<Object> releaseClausePath = playerPage.getByXPath("//label[contains(.,'Release clause')]");
 					if (releaseClausePath != null && !releaseClausePath.isEmpty()) {
 						HtmlLabel releaseClauseLabel = (HtmlLabel) releaseClausePath.get(0);
 						releaseClause = releaseClauseLabel.getEnclosingElement("li").getElementsByTagName("span").get(0)
 								.getTextContent();
 					}
 
-					List<Object> kitNumberLabelPath = playerPage.getByXPath("//label[contains(.,'Kit Number')]");
+					List<Object> kitNumberLabelPath = playerPage.getByXPath("//label[contains(.,'Kit number')]");
 
 					String kitNumber = "Unknown";
 					if (kitNumberLabelPath != null && !kitNumberLabelPath.isEmpty()) {
@@ -231,11 +231,11 @@ public class PlayerDetails {
 							.getTextContent().replaceAll("[^0-9]", "");
 
 					HtmlSpan headingAccuracySpan = (HtmlSpan) playerPage
-							.getByXPath("//span[contains(.,'Heading Accuracy')]").get(0);
+							.getByXPath("//span[contains(.,'Heading accuracy')]").get(0);
 					String headingAccuracyValue = headingAccuracySpan.getEnclosingElement("li")
 							.getElementsByTagName("span").get(0).getTextContent().replaceAll("[^0-9]", "");
 
-					HtmlSpan shortPassingSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Short Passing')]")
+					HtmlSpan shortPassingSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Short passing')]")
 							.get(0);
 					String shortPassingValue = shortPassingSpan.getEnclosingElement("li").getElementsByTagName("span")
 							.get(0).getTextContent().replaceAll("[^0-9]", "");
@@ -257,12 +257,12 @@ public class PlayerDetails {
 					String fkAccuracyValue = fkAccuracySpan.getEnclosingElement("li").getElementsByTagName("span")
 							.get(0).getTextContent().replaceAll("[^0-9]", "");
 
-					HtmlSpan longPassingSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Long Passing')]")
+					HtmlSpan longPassingSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Long passing')]")
 							.get(0);
 					String longPassingValue = longPassingSpan.getEnclosingElement("li").getElementsByTagName("span")
 							.get(0).getTextContent().replaceAll("[^0-9]", "");
 
-					HtmlSpan ballControlSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Ball Control')]")
+					HtmlSpan ballControlSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Ball control')]")
 							.get(0);
 					String ballControlValue = ballControlSpan.getEnclosingElement("li").getElementsByTagName("span")
 							.get(0).getTextContent().replaceAll("[^0-9]", "");
@@ -272,7 +272,7 @@ public class PlayerDetails {
 					String accelerationValue = accelerationSpan.getEnclosingElement("li").getElementsByTagName("span")
 							.get(0).getTextContent().replaceAll("[^0-9]", "");
 
-					HtmlSpan sprintSpeedSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Sprint Speed')]")
+					HtmlSpan sprintSpeedSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Sprint speed')]")
 							.get(0);
 					String sprintSpeedValue = sprintSpeedSpan.getEnclosingElement("li").getElementsByTagName("span")
 							.get(0).getTextContent().replaceAll("[^0-9]", "");
@@ -289,7 +289,7 @@ public class PlayerDetails {
 					String balanceValue = balanceSpan.getEnclosingElement("li").getElementsByTagName("span").get(0)
 							.getTextContent().replaceAll("[^0-9]", "");
 
-					HtmlSpan shotPowerSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Shot Power')]")
+					HtmlSpan shotPowerSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Shot power')]")
 							.get(0);
 					String shotPowerValue = shotPowerSpan.getEnclosingElement("li").getElementsByTagName("span").get(0)
 							.getTextContent().replaceAll("[^0-9]", "");
@@ -306,7 +306,7 @@ public class PlayerDetails {
 					String strengthValue = strengthSpan.getEnclosingElement("li").getElementsByTagName("span").get(0)
 							.getTextContent().replaceAll("[^0-9]", "");
 
-					HtmlSpan longShotsSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Long Shots')]")
+					HtmlSpan longShotsSpan = (HtmlSpan) playerPage.getByXPath("//span[contains(.,'Long shots')]")
 							.get(0);
 					String longShotsValue = longShotsSpan.getEnclosingElement("li").getElementsByTagName("span").get(0)
 							.getTextContent().replaceAll("[^0-9]", "");
@@ -345,7 +345,7 @@ public class PlayerDetails {
 
 					String defensiveAwarenessValue;
 					List<Object> defensiveAwarenessPath = playerPage
-							.getByXPath("//span[contains(.,'Defensive Awareness')]");
+							.getByXPath("//span[contains(.,'Defensive awareness')]");
 					if (defensiveAwarenessPath != null && !defensiveAwarenessPath.isEmpty()) {
 
 						HtmlSpan defensiveAwarenessSpan = (HtmlSpan) defensiveAwarenessPath.get(0);
@@ -358,12 +358,12 @@ public class PlayerDetails {
 					}
 
 					HtmlSpan standingTackleSpan = (HtmlSpan) playerPage
-							.getByXPath("//span[contains(.,'Standing Tackle')]").get(0);
+							.getByXPath("//span[contains(.,'Standing tackle')]").get(0);
 					String standingTackleValue = standingTackleSpan.getEnclosingElement("li")
 							.getElementsByTagName("span").get(0).getTextContent().replaceAll("[^0-9]", "");
 
 					HtmlSpan slidingTackleSpan = (HtmlSpan) playerPage
-							.getByXPath("//span[contains(.,'Sliding Tackle')]").get(0);
+							.getByXPath("//span[contains(.,'Sliding tackle')]").get(0);
 					String slidingTackleValue = slidingTackleSpan.getEnclosingElement("li").getElementsByTagName("span")
 							.get(0).getTextContent().replaceAll("[^0-9]", "");
 
