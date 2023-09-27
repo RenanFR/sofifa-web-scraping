@@ -84,10 +84,10 @@ public class PlayerDetails {
 				String playerURLComplete = SoFifaWebScraping.SOFIFA_URL.replace("/players", playerURL);
 				HtmlPage playerPage = webClient.getPage(playerURLComplete);
 
-				List<Object> fifaLatestVersionForPlayerPath = playerPage.getByXPath("//span[contains(.,'FIFA 23')]");
+				List<Object> fifaLatestVersionForPlayerPath = playerPage.getByXPath("//span[contains(.,'FC 24')]");
 
 				if (!fifaLatestVersionForPlayerPath.isEmpty()) {
-					System.out.println("FIFA 23 player");
+					System.out.println("FC 24 player");
 					HtmlDivision infoDiv = (HtmlDivision) playerPage.getByXPath("//div[contains(@class, 'info')]")
 							.get(0);
 

@@ -23,7 +23,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 public class SoFifaWebScraping {
 
 	public static final String PLAYERS_URL_LIST_CSV_PATH = "./src/main/resources/players_url_list.csv";
-	public static final String SOFIFA_URL = "https://sofifa.com/players?r=230052&set=true";
+	public static final String SOFIFA_URL = "https://sofifa.com/players?r=240003&set=true";
 
 	static List<String> playersURLList = new ArrayList<>();
 
