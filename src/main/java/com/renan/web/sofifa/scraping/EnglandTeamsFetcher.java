@@ -21,12 +21,12 @@ public class EnglandTeamsFetcher {
 			webClient.getOptions().setJavaScriptEnabled(false);
 
 			// Replace this URL with the actual URL of the Sofifa page you want to scrape
-			String url = "https://sofifa.com/teams?type=all&na%5B0%5D=14&na%5B1%5D=25&na%5B2%5D=35&na%5B3%5D=42&r=150059&set=true&showCol%5B0%5D=oa&showCol%5B1%5D=at&showCol%5B2%5D=md&showCol%5B3%5D=df&showCol%5B4%5D=tb&showCol%5B5%5D=ps&showCol%5B6%5D=ti&showCol%5B7%5D=cw&showCol%5B8%5D=bs&showCol%5B9%5D=bd&showCol%5B10%5D=bp&showCol%5B11%5D=bps&showCol%5B12%5D=dp&showCol%5B13%5D=ip&showCol%5B14%5D=sa&showCol%5B15%5D=ta&showCol%5B16%5D=dw&showCol%5B17%5D=dm&showCol%5B18%5D=da&showCol%5B19%5D=dd&showCol%5B20%5D=cps&showCol%5B21%5D=cs&showCol%5B22%5D=cp&showCol%5B23%5D=cc";
+			String url = "https://sofifa.com/teams?type=all&na%5B0%5D=14&na%5B1%5D=25&na%5B2%5D=35&na%5B3%5D=42&r=240014&set=true&showCol%5B0%5D=ti&showCol%5B1%5D=oa&showCol%5B2%5D=at&showCol%5B3%5D=md&showCol%5B4%5D=df&showCol%5B5%5D=tb&showCol%5B6%5D=cw&showCol%5B7%5D=bs&showCol%5B8%5D=bd&showCol%5B9%5D=bp&showCol%5B10%5D=bps&showCol%5B11%5D=cc&showCol%5B12%5D=cs&showCol%5B13%5D=da&showCol%5B14%5D=dm&showCol%5B15%5D=dw&showCol%5B16%5D=dd&showCol%5B17%5D=dp&showCol%5B18%5D=ip&showCol%5B19%5D=ps&showCol%5B20%5D=sa&showCol%5B21%5D=ta";
 
 			HtmlPage page = webClient.getPage(url);
 
 			// Store the teams in a CSV file
-			FileWriter csvWriter = new FileWriter("FIFA 15-teams.csv");
+			FileWriter csvWriter = new FileWriter("FC 24-teams.csv");
 			writeHeaders(csvWriter);
 
 			while (true) {
